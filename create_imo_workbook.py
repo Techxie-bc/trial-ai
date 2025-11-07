@@ -1,4 +1,5 @@
 import csv
+import os
 from openpyxl import Workbook
 
 # List of all 27 LGAs in Imo State (cleaned for Excel sheet names)
@@ -32,29 +33,69 @@ imo_lgas = [
     "Owerri West"
 ]
 
+# Mapping of LGA names to their corresponding CSV file names
+csv_file_mapping = {
+    "Aboh Mbaise": "aboh_mbaise.csv",
+    "Ahiazu Mbaise": "ahiazu_mbaise.csv",
+    "Ehime Mbano": "ehime_mbano.csv",
+    "Ezinihitte Mbaise": "ezinihitte.csv",
+    "Ideato North": "ideato_north.csv",
+    "Ideato South": "ideato_south.csv",
+    "Ihitte Uboma": "ihitte_uboma.csv",
+    "Ikeduru": "ikeduru.csv",
+    "Isiala Mbano": "isiala_mbano.csv",
+    "Isu": "isu.csv",
+    "Mbaitoli": "mbaitoli.csv",
+    "Ngor Okpala": "ngor_okpala.csv",
+    "Njaba": "njaba.csv",
+    "Nkwerre": "nkwerre.csv",
+    "Nwangele": "nwangele.csv",
+    "Obowo": "obowo.csv",
+    "Oguta": "oguta.csv",
+    "Ohaji Egbema": "ohaji_egbema.csv",
+    "Okigwe": "okigwe.csv",
+    "Onuimo": "onuimo.csv",
+    "Orlu": "orlu.csv",
+    "Orsu": "orsu.csv",
+    "Oru East": "oru_east.csv",
+    "Oru West": "oru_west.csv",
+    "Owerri Municipal": "owerri_municipal.csv",
+    "Owerri North": "owerri_north.csv",
+    "Owerri West": "owerri_west.csv"
+}
+
 # Create a new workbook
 wb = Workbook()
 wb.remove(wb.active)  # Remove default sheet
 
-# Read the existing Ezinihitte Mbaise data
-ezinihitte_data = []
-try:
-    with open(r'C:\Users\USER\Desktop\trial ai\ezinihitte.csv', 'r', encoding='utf-8') as file:
-        csv_reader = csv.reader(file)
-        ezinihitte_data = list(csv_reader)
-    print(f"Loaded {len(ezinihitte_data)} rows from CSV file")
-except FileNotFoundError:
-    print("CSV file not found. Creating empty sheets.")
+# Function to load CSV data
+def load_csv_data(csv_filename):
+    try:
+        file_path = rf'C:\Users\USER\Desktop\trial ai\{csv_filename}'
+        with open(file_path, 'r', encoding='utf-8') as file:
+            csv_reader = csv.reader(file)
+            data = list(csv_reader)
+        return data
+    except FileNotFoundError:
+        print(f"CSV file not found: {csv_filename}")
+        return None
 
 # Create sheets for each LGA
 for lga in imo_lgas:
     ws = wb.create_sheet(title=lga)
     
-    # If this is Ezinihitte Mbaise, add the existing data
-    if lga == "Ezinihitte Mbaise" and ezinihitte_data:
-        for row in ezinihitte_data:
-            ws.append(row)
-        print(f"Added data to {lga} sheet ({len(ezinihitte_data)-1} projects)")
+    # Check if we have CSV data for this LGA
+    if lga in csv_file_mapping:
+        csv_data = load_csv_data(csv_file_mapping[lga])
+        if csv_data:
+            for row in csv_data:
+                ws.append(row)
+            print(f"Added data to {lga} sheet ({len(csv_data)-1} projects)")
+        else:
+            # Add headers for empty sheets if CSV not found
+            headers = ["S/N", "WARD", "PROJECT TO BE EXECUTED", "LOCATION"]
+            ws.append(headers)
+            print(f"Created empty sheet for {lga} (CSV not found)")
     else:
         # Add headers for empty sheets
         headers = ["S/N", "WARD", "PROJECT TO BE EXECUTED", "LOCATION"]
